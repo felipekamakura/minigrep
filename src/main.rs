@@ -1,4 +1,4 @@
-use std::{env, fs::read_to_string, process};
+use std::{env, error::Error, fs, process};
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -7,13 +7,21 @@ fn main() {
         println!("Problem parsing arguments: {err}");
         process::exit(1);
     });
-  
+
     println!("Searching for {}", config.query);
     println!("In file {}", config.file_path);
 
-    let contents = read_to_string(config.file_path).expect("Should have read the file successfully!");
+    if let Err(err) = run(&config) {
+        println!("Could not open file: {}. Error: {}", &config.file_path, err);
+        process::exit(1)
+    }    
+}
+
+fn run(config: &Config) -> Result<(), Box<dyn Error>>{
+    let contents = fs::read_to_string(&config.file_path)?;
 
     println!("With text:\n{contents}");
+    Ok(())
 }
 
 struct Config {
@@ -29,7 +37,7 @@ impl Config {
 
         let query = args[1].clone();
         let file_path = args[2].clone();
-    
+
         Ok(Config { query, file_path })
     }
 }
