@@ -10,7 +10,7 @@ pub fn run(config: &Config) -> Result<(), Box<dyn error::Error>> {
     };
 
     match results[..] {
-        [] => println!("No matches!"),
+        [] => eprintln!("No matches!"),
         _ => results.iter().for_each(|line| println!("{line}")),
     }
 
