@@ -9,9 +9,6 @@ fn main() {
         process::exit(1);
     });
 
-    println!("Searching for {}", config.query);
-    println!("In file {}", config.file_path);
-
     if let Err(err) = run(&config) {
         println!("Could not open file: {}. Error: {}", &config.file_path, err);
         process::exit(1)
