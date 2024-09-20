@@ -1,4 +1,5 @@
-use std::{env, error::Error, fs, process};
+use std::{env, process};
+use minigrep::{Config, run};
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -15,29 +16,4 @@ fn main() {
         println!("Could not open file: {}. Error: {}", &config.file_path, err);
         process::exit(1)
     }    
-}
-
-fn run(config: &Config) -> Result<(), Box<dyn Error>>{
-    let contents = fs::read_to_string(&config.file_path)?;
-
-    println!("With text:\n{contents}");
-    Ok(())
-}
-
-struct Config {
-    query: String,
-    file_path: String,
-}
-
-impl Config {
-    fn build(args: &[String]) -> Result<Config, &str> {
-        if args.len() < 3 {
-            return Err("Not enough arguments!");
-        }
-
-        let query = args[1].clone();
-        let file_path = args[2].clone();
-
-        Ok(Config { query, file_path })
-    }
 }
