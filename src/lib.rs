@@ -1,3 +1,5 @@
+//! This crate is the heart of minigrep
+
 use std::{error, fs};
 
 pub fn run(config: &Config) -> Result<(), Box<dyn error::Error>> {
@@ -17,14 +19,22 @@ pub fn run(config: &Config) -> Result<(), Box<dyn error::Error>> {
     Ok(())
 }
 
-fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
+/// Search function. Should perform a search in the content
+/// 
+/// Example:
+/// ```
+/// let query = "o";
+/// let contents = "one\ntwo\nthree";
+/// assert_eq!(vec!["one", "two"], minigrep::search(query, contents));
+/// ```
+pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
     contents
         .lines()
         .filter(|line| line.contains(query))
         .collect()
 }
 
-fn search_case_insensitive<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
+pub fn search_case_insensitive<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
     let query = query.to_lowercase();
     contents
         .lines()
@@ -32,6 +42,13 @@ fn search_case_insensitive<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
         .collect()
 }
 
+/// # Config Model
+/// ## Motivation
+/// This is a model value that carries all the configuration values coming from input **args** and also environment variables.
+/// 
+/// Support variables:
+/// - `IGNORE_CASE`: when set, runs the search ignoring case
+/// 
 pub struct Config {
     pub query: String,
     pub file_path: String,
@@ -39,17 +56,25 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn build(args: &[String]) -> Result<Config, &str> {
-        if args.len() < 3 {
-            return Err("Not enough arguments!");
-        }
+    pub fn build(mut args: impl Iterator<Item = String>) -> Result<Config, &'static str> {
+        args.next();
 
-        let query = args[1].clone();
-        let file_path = args[2].clone();
+        let query = match args.next() {
+            Some(arg) => arg,
+            None => return Err("Didn't get a query string"),
+        };
 
+        let file_path = match args.next() {
+            Some(arg) => arg,
+            None => return Err("Didn't get a file path"),
+        };
         let ignore_case = std::env::var("IGNORE_CASE").is_ok();
 
-        Ok(Config { query, file_path,ignore_case })
+        Ok(Config {
+            query,
+            file_path,
+            ignore_case,
+        })
     }
 }
 
